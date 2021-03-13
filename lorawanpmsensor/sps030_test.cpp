@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include "sps030.h"
+#include "sps30.h"
 
 static bool validate_rx(const char *name, uint8_t cmd, size_t len, uint8_t buf[])
 {
-    SPS030 sps;
+    SPS30 sps;
     
     printf("Running test '%s'...", name);
     sps.reset(cmd);
@@ -22,7 +22,7 @@ static bool validate_rx(const char *name, uint8_t cmd, size_t len, uint8_t buf[]
 
 static bool test_rx(void)
 {
-    SPS030 sps;
+    SPS30 sps;
 
     sps.reset(3);
     sps.process(0x7E);

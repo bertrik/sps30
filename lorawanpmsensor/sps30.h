@@ -2,19 +2,19 @@
 #include <stdint.h>
 
 typedef enum {
-    SPS030_START,
-    SPS030_ADR,
-    SPS030_CMD,
-    SPS030_STATE,
-    SPS030_L,
-    SPS030_DATA,
-    SPS030_CHK,
-    SPS030_STOP
+    SPS30_START,
+    SPS30_ADR,
+    SPS30_CMD,
+    SPS30_STATE,
+    SPS30_L,
+    SPS30_DATA,
+    SPS30_CHK,
+    SPS30_STOP
 } state_t;
 
 
 
-class SPS030 {
+class SPS30 {
 
 private:
     state_t _state;

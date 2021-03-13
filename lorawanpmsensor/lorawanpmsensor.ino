@@ -19,7 +19,7 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 
-#include "sps030.h"
+#include "sps30.h"
 #include "editline.h"
 #include "cmdproc.h"
 
@@ -347,6 +347,7 @@ static int do_send(int argc, char *argv[])
     int len = strlen(hex) / 2;
     parsehex(hex, buf, len);
     
+    printf("Sending %d bytes ...\n", len);
     spsSerial.write(buf, len);
 
     return 0;
@@ -396,7 +397,9 @@ void setup(void)
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     screen.enabled = true;
 
-    // initialize the SPS030 serial
+    // initialize the SPS30 serial
+    pinMode(PIN_SDS_RX, INPUT);
+    pinMode(PIN_SDS_TX, OUTPUT);
     spsSerial.begin(115200, SERIAL_8N1, PIN_SDS_RX, PIN_SDS_TX, false);
 
     // restore LoRaWAN keys from EEPROM, or use a default
@@ -426,15 +429,23 @@ void setup(void)
     ArduinoOTA.begin();
 }
 
+static SPS30 sps;
+
 void loop(void)
 {
     unsigned long ms = millis();
     unsigned long second = ms / 1000UL;
 
-    // print incoming SPS030 bytes
-    while (spsSerial.available()) {
-        char c = spsSerial.read();
+    // print incoming SPS30 bytes
+    if (spsSerial.available()) {
+        uint8_t c = spsSerial.read();
+        if (c == 0x7E) {
+            printf("\n");
+        }
         printf(" %02X", c);
+        if (sps.process(c)) {
+            printf("Got frame!\n");
+        }
     }
 
     // parse command line
