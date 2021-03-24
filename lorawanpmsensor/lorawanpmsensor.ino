@@ -122,6 +122,7 @@ static unsigned long screen_last_enabled = 0;
 static nvdata_t nvdata;
 static char cmdline[200];
 static rps_t last_tx_rps = 0;
+static SPS30 sps;
 
 void os_getDevEui(u1_t * buf)
 {
@@ -264,11 +265,12 @@ static void screen_update(unsigned long int second)
     }
 }
 
-static void show_help(const cmd_t * cmds)
+static int show_help(const cmd_t * cmds)
 {
     for (const cmd_t * cmd = cmds; cmd->cmd != NULL; cmd++) {
         printf("%10s: %s\n", cmd->name, cmd->help);
     }
+    return CMD_OK;
 }
 
 static int do_help(int argc, char *argv[]);
@@ -353,18 +355,96 @@ static int do_send(int argc, char *argv[])
     return 0;
 }
 
+static int sps_exchange(int argc, char *argv[])
+{
+    printf("sps_exchange not implemented yet!\n");
+    return 0;
+}
+
+static int sps_start(int argc, char *argv[])
+{
+    uint8_t buf[256];
+    uint8_t data[2];
+    
+    data[0] = 1;    // sub-command
+    data[1] = 5;    // integer big endian
+
+    int len = sps.build(buf, 0x00, sizeof(data), data);
+    printhex(buf, len);
+    spsSerial.write(buf, len);
+
+    return CMD_OK;
+}
+
+static int sps_stop(int argc, char *argv[])
+{
+    uint8_t buf[256];
+    
+    int len = sps.build(buf, 0x01, 0, NULL);
+    printhex(buf, len);
+    spsSerial.write(buf, len);
+
+    return CMD_OK;
+}
+
+static int sps_read_measurement(int argc, char *argv[])
+{
+    uint8_t buf[256];
+
+    int len = sps.build(buf, 0x03, 0, NULL);
+    printhex(buf, len);
+    spsSerial.write(buf, len);
+
+    return CMD_OK;
+}
+
+static int sps_device_info(int argc, char *argv[])
+{
+    uint8_t buf[256];
+    uint8_t data[1];
+
+    data[0] = (argc > 1) ? atoi(argv[1]) : 0;
+
+    int len = sps.build(buf, 0xd0, sizeof(data), data);
+    printhex(buf, len);
+    spsSerial.write(buf, len);
+
+    return CMD_OK;
+}
+
+static const cmd_t sps_commands[] = {
+    {"00", sps_start, "Start measurement"},
+    {"01", sps_stop, "Stop measurement"},
+    {"03", sps_read_measurement, "Read measured value"},
+    {"d0", sps_device_info, "[type] Read device information"},
+    { NULL, NULL, NULL }
+};
+
+static int do_sps(int argc, char *argv[])
+{
+    if (argc < 2) {
+        return show_help(sps_commands);
+    }
+    const cmd_t *cmd = cmd_find(sps_commands, argv[1]);
+    if (cmd == NULL) {
+        printf("Unhandled '%s', available commands:\n", argv[1]);
+        return show_help(sps_commands);
+    }
+    return cmd->cmd(argc - 1, argv + 1);    
+}
+
 const cmd_t commands[] = {
     { "help", do_help, "Show help" },
     { "reboot", do_reboot, "Reboot ESP" },
     { "send", do_send, "<data>" },
     { "otaa", do_otaa, "[reset|<[deveui] [appeui] [appkey]>] Query/reset/set OTAA parameters" },
+    { "sps", do_sps, "Execute SPS command" },
     { NULL, NULL, NULL }
 };
 
 static int do_help(int argc, char *argv[])
 {
-    show_help(commands);
-    return CMD_OK;
+    return show_help(commands);
 }
 
 void setup(void)
@@ -428,8 +508,6 @@ void setup(void)
     ArduinoOTA.setHostname("esp32-pmsensor");
     ArduinoOTA.begin();
 }
-
-static SPS30 sps;
 
 void loop(void)
 {

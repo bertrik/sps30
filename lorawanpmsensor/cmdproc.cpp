@@ -3,7 +3,7 @@
 #include "cmdproc.h"
 
 
-static const cmd_t *find_cmd(const cmd_t * commands, const char *name)
+const cmd_t *cmd_find(const cmd_t * commands, const char *name)
 {
     const cmd_t *cmd;
     for (cmd = commands; cmd->cmd != NULL; cmd++) {
@@ -36,7 +36,7 @@ int cmd_process(const cmd_t * commands, char *line)
         return CMD_NO_CMD;
     }
     // find matching entry
-    const cmd_t *cmd = find_cmd(commands, argv[0]);
+    const cmd_t *cmd = cmd_find(commands, argv[0]);
     if (cmd == NULL) {
         // no command found
         return CMD_UNKNOWN;

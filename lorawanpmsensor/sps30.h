@@ -41,6 +41,7 @@ public:
 //    explicit MHZ19(Stream *serial);
 
     bool process(uint8_t c);
+    int build(uint8_t *buf, uint8_t cmd, size_t data_len, const uint8_t *data);
     
     void reset(uint8_t cmd);
 

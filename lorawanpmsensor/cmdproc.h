@@ -24,3 +24,5 @@ typedef struct {
  */
 int cmd_process(const cmd_t *commands, char *line);
 
+const cmd_t *cmd_find(const cmd_t * commands, const char *name);
+

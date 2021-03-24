@@ -22,7 +22,38 @@ bool SPS30::unescape(uint8_t *pc)
     return true;
 }
 
+static int add_byte(uint8_t *buf, int &idx, uint8_t b)
+{
+    switch (b) {
+    case 0x7E:
+    case 0x7D:
+    case 0x11:
+    case 0x13:
+        buf[idx++] = 0x7D;
+        buf[idx++] = b ^ 0x20;
+        break;
+    default:
+        buf[idx++] = b;
+        break;
+    }
+    return b;
+}
 
+int SPS30::build(uint8_t *buf, uint8_t cmd, size_t data_len, const uint8_t *data)
+{
+    uint8_t sum = 0;
+    int index = 0;
+    buf[index++] = 0x7E;
+    sum += add_byte(buf, index, 0);
+    sum += add_byte(buf, index, cmd);
+    sum += add_byte(buf, index, data_len);
+    for (int i = 0; i < data_len; i++) {
+        sum += add_byte(buf, index, data[i]);
+    }
+    buf[index++] = sum ^ 0xFF;
+    buf[index++] = 0x7E;
+    return index;
+}
 
 void SPS30::reset(uint8_t cmd)
 {
