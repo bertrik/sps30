@@ -46,6 +46,31 @@ int SPS30::sps_exchange(uint8_t cmd, size_t out_len, uint8_t *out_buf, uint8_t *
     return -1;
 }  
 
+bool SPS30::sps_device_info(char *product_type, char *serial_number)
+{
+    uint8_t mosi[1];
+    uint8_t miso[256];
+    int len;
+
+    // product type
+    mosi[0] = 0;
+    len = sps_exchange(0xd0, sizeof(mosi), mosi, miso);
+    if (len <= 0) {
+        return false;
+    }
+    strlcpy(product_type, (const char *)miso, len);
+    
+    // serial number
+    mosi[0] = 3;
+    len = sps_exchange(0xd0, sizeof(mosi), mosi, miso);
+    if (len <= 0) {
+        return false;
+    }
+    strlcpy(serial_number, (const char *)miso, len);
+    
+    return true;
+}
+
 
 bool SPS30::sps_start(bool use_float)
 {
@@ -71,6 +96,5 @@ bool SPS30::sps_read_measurement(void)
 
     return sps_exchange(0x03, 0, NULL, buf) > 0;
 }
-
 
 

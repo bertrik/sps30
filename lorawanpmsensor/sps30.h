@@ -20,6 +20,7 @@ public:
      */
     explicit SPS30(Stream *serial);
 
+    bool sps_device_info(char *product_type, char *serial_number);
     bool sps_start(bool use_float);
     bool sps_stop(void);
     bool sps_read_measurement(void);

@@ -374,10 +374,25 @@ static int sps_read_measurement(int argc, char *argv[])
     return result ? CMD_OK : -1;
 }
 
+static int sps_device_info(int argc, char *argv[])
+{
+    char product_type[20];
+    char serial_nr[20];
+
+    if (sps.sps_device_info(product_type, serial_nr)) {
+        printf("product type: %s\n", product_type);
+        printf("serial_nr   : %s\n", serial_nr);
+        return CMD_OK;
+    }
+    
+    return -1;
+}
+
 static const cmd_t sps_commands[] = {
     {"00", sps_start, "Start measurement"},
     {"01", sps_stop, "Stop measurement"},
     {"03", sps_read_measurement, "Read measured value"},
+    {"d0", sps_device_info, "Device information"},
     { NULL, NULL, NULL }
 };
 
