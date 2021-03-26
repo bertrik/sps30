@@ -370,8 +370,22 @@ static int sps_stop(int argc, char *argv[])
 
 static int sps_read_measurement(int argc, char *argv[])
 {
-    bool result = sps.read_measurement();
-    return result ? CMD_OK : -1;
+    uint16_t pm1_0;
+    uint16_t pm2_5;
+    uint16_t pm4_0;
+    uint16_t pm10;
+    uint16_t ps;
+
+    if (sps.read_measurement(&pm1_0, &pm2_5, &pm4_0, &pm10, &ps)) {
+        printf("PM1.0 = %u\n", pm1_0);
+        printf("PM2.5 = %u\n", pm2_5);
+        printf("PM4.0 = %u\n", pm4_0);
+        printf("PM10  = %u\n", pm10);
+        printf("size  = %u\n", ps);
+        return CMD_OK;
+    }
+
+    return -1;
 }
 
 static int sps_device_info(int argc, char *argv[])

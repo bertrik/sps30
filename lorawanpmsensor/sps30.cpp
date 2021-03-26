@@ -26,7 +26,6 @@ int SPS30::exchange(uint8_t cmd, size_t out_len, uint8_t *out_buf, uint8_t *in_b
     size_t in_len;
 
     // build command and send it
-    shdlc.reset(cmd);
     int len = shdlc.build_mosi(buf, cmd, out_len, out_buf);
     _serial->write(buf, len);
     printhex(buf, len);
@@ -78,7 +77,7 @@ bool SPS30::start(bool use_float)
     uint8_t buf[256];
     
     data[0] = 1;    // sub-command
-    data[1] = use_float ? 5 : 3;
+    data[1] = use_float ? 3 : 5;
     return exchange(0x00, sizeof(data), data, buf) == 0;
 }
 
@@ -90,11 +89,20 @@ bool SPS30::stop(void)
     return exchange(0x01, 0, NULL, buf) == 0;
 }
 
-bool SPS30::read_measurement(void)
+bool SPS30::read_measurement(uint16_t *pm1_0, uint16_t *pm2_5, uint16_t *pm4_0, uint16_t *pm10, uint16_t *ps)
 {
-    uint8_t buf[256];
+    uint8_t miso[40];
 
-    return exchange(0x03, 0, NULL, buf) > 0;
+    int len = exchange(0x03, 0, NULL, miso);
+    if (len < 20) {
+        return false;
+    }
+    *pm1_0 = (miso[0] << 8) + miso[1];
+    *pm2_5 = (miso[2] << 8) + miso[3];
+    *pm4_0 = (miso[4] << 8) + miso[5];
+    *pm10 = (miso[6] << 8) + miso[7];
+    *ps = (miso[18] << 8) + miso[19];
+    return true;
 }
 
 
