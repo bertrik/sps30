@@ -19,6 +19,7 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 
+#include "shdlc.h"
 #include "sps30.h"
 #include "editline.h"
 #include "cmdproc.h"
@@ -122,7 +123,7 @@ static unsigned long screen_last_enabled = 0;
 static nvdata_t nvdata;
 static char cmdline[200];
 static rps_t last_tx_rps = 0;
-static SPS30 sps;
+static SPS30 sps(&spsSerial);
 
 void os_getDevEui(u1_t * buf)
 {
@@ -355,68 +356,28 @@ static int do_send(int argc, char *argv[])
     return 0;
 }
 
-static int sps_exchange(int argc, char *argv[])
-{
-    printf("sps_exchange not implemented yet!\n");
-    return 0;
-}
-
 static int sps_start(int argc, char *argv[])
 {
-    uint8_t buf[256];
-    uint8_t data[2];
-    
-    data[0] = 1;    // sub-command
-    data[1] = 5;    // integer big endian
-
-    int len = sps.build(buf, 0x00, sizeof(data), data);
-    printhex(buf, len);
-    spsSerial.write(buf, len);
-
-    return CMD_OK;
+    bool result = sps.sps_start(false);
+    return result ? CMD_OK : -1;
 }
 
 static int sps_stop(int argc, char *argv[])
 {
-    uint8_t buf[256];
-    
-    int len = sps.build(buf, 0x01, 0, NULL);
-    printhex(buf, len);
-    spsSerial.write(buf, len);
-
-    return CMD_OK;
+    bool result = sps.sps_stop();
+    return result ? CMD_OK : -1;
 }
 
 static int sps_read_measurement(int argc, char *argv[])
 {
-    uint8_t buf[256];
-
-    int len = sps.build(buf, 0x03, 0, NULL);
-    printhex(buf, len);
-    spsSerial.write(buf, len);
-
-    return CMD_OK;
-}
-
-static int sps_device_info(int argc, char *argv[])
-{
-    uint8_t buf[256];
-    uint8_t data[1];
-
-    data[0] = (argc > 1) ? atoi(argv[1]) : 0;
-
-    int len = sps.build(buf, 0xd0, sizeof(data), data);
-    printhex(buf, len);
-    spsSerial.write(buf, len);
-
-    return CMD_OK;
+    bool result = sps.sps_read_measurement();
+    return result ? CMD_OK : -1;
 }
 
 static const cmd_t sps_commands[] = {
     {"00", sps_start, "Start measurement"},
     {"01", sps_stop, "Stop measurement"},
     {"03", sps_read_measurement, "Read measured value"},
-    {"d0", sps_device_info, "[type] Read device information"},
     { NULL, NULL, NULL }
 };
 
@@ -513,18 +474,6 @@ void loop(void)
 {
     unsigned long ms = millis();
     unsigned long second = ms / 1000UL;
-
-    // print incoming SPS30 bytes
-    if (spsSerial.available()) {
-        uint8_t c = spsSerial.read();
-        if (c == 0x7E) {
-            printf("\n");
-        }
-        printf(" %02X", c);
-        if (sps.process(c)) {
-            printf("Got frame!\n");
-        }
-    }
 
     // parse command line
     if (Serial.available()) {

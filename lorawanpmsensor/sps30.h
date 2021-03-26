@@ -1,34 +1,14 @@
+#include <Arduino.h>
+
 #include <stdbool.h>
 #include <stdint.h>
-
-typedef enum {
-    SPS30_START,
-    SPS30_ADR,
-    SPS30_CMD,
-    SPS30_STATE,
-    SPS30_L,
-    SPS30_DATA,
-    SPS30_CHK,
-    SPS30_STOP
-} state_t;
-
-
 
 class SPS30 {
 
 private:
-    state_t _state;
-    uint8_t _cmd;
-    int _index;
-    int _length;
-    uint8_t _data[256];
-    bool _escape;
-    uint8_t _check;
-    uint8_t _miso_state;
+    Stream *_serial;
 
-private:
-
-    bool unescape(uint8_t *pc);
+    int sps_exchange(uint8_t cmd, size_t out_len, uint8_t *out_buf, uint8_t *in_buf);
 
 public:
     static const int BIT_RATE = 115200;
@@ -38,12 +18,11 @@ public:
      *
      * @param serial the serial port, NOTE: the serial port has to be configured for a bit rate of MHZ19::BIT_RATE !
      */
-//    explicit MHZ19(Stream *serial);
+    explicit SPS30(Stream *serial);
 
-    bool process(uint8_t c);
-    int build(uint8_t *buf, uint8_t cmd, size_t data_len, const uint8_t *data);
-    
-    void reset(uint8_t cmd);
+    bool sps_start(bool use_float);
+    bool sps_stop(void);
+    bool sps_read_measurement(void);
 
 };
 
