@@ -7,8 +7,10 @@ class SPS30 {
 
 private:
     Stream *_serial;
+    uint8_t _mosi[256];
+    uint8_t _miso[256];
 
-    int exchange(uint8_t cmd, size_t out_len, uint8_t *out_buf, uint8_t *in_buf);
+    int exchange(uint8_t cmd, size_t out_len);
 
 public:
     static const int BIT_RATE = 115200;
@@ -16,7 +18,7 @@ public:
     /**
      * Constructor.
      *
-     * @param serial the serial port, NOTE: the serial port has to be configured for a bit rate of MHZ19::BIT_RATE !
+     * @param serial the serial port, NOTE: the serial port has to be configured for a bit rate of SPS30::BIT_RATE !
      */
     explicit SPS30(Stream *serial);
 
