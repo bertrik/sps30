@@ -42,6 +42,13 @@ size_t SHDLC::build_mosi(uint8_t *buf, uint8_t cmd, size_t data_len, const uint8
 {
     uint8_t sum = 0;
     int index = 0;
+
+    // reset state machine
+    _cmd = cmd;
+    _state = SHDLC_START;
+    _escape = false;
+
+    // build command
     buf[index++] = 0x7E;
     sum += add_byte(buf, index, 0);
     sum += add_byte(buf, index, cmd);
@@ -52,13 +59,6 @@ size_t SHDLC::build_mosi(uint8_t *buf, uint8_t cmd, size_t data_len, const uint8
     buf[index++] = sum ^ 0xFF;
     buf[index++] = 0x7E;
     return index;
-}
-
-void SHDLC::reset(uint8_t cmd)
-{
-    _cmd = cmd;
-    _state = SHDLC_START;
-    _escape = false;
 }
 
 size_t SHDLC::get_data(uint8_t *data)

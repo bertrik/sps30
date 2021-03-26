@@ -35,8 +35,6 @@ public:
     size_t build_mosi(uint8_t *buf, uint8_t cmd, size_t data_len, const uint8_t *data);
     bool proc_miso(uint8_t c, uint8_t cmd);
     
-    void reset(uint8_t cmd);
-    
     size_t get_data(uint8_t *data);
     uint8_t get_state(void);
 
