@@ -358,19 +358,19 @@ static int do_send(int argc, char *argv[])
 
 static int sps_start(int argc, char *argv[])
 {
-    bool result = sps.sps_start(false);
+    bool result = sps.start(false);
     return result ? CMD_OK : -1;
 }
 
 static int sps_stop(int argc, char *argv[])
 {
-    bool result = sps.sps_stop();
+    bool result = sps.stop();
     return result ? CMD_OK : -1;
 }
 
 static int sps_read_measurement(int argc, char *argv[])
 {
-    bool result = sps.sps_read_measurement();
+    bool result = sps.read_measurement();
     return result ? CMD_OK : -1;
 }
 
@@ -379,7 +379,7 @@ static int sps_device_info(int argc, char *argv[])
     char product_type[20];
     char serial_nr[20];
 
-    if (sps.sps_device_info(product_type, serial_nr)) {
+    if (sps.device_info(product_type, serial_nr)) {
         printf("product type: %s\n", product_type);
         printf("serial_nr   : %s\n", serial_nr);
         return CMD_OK;
