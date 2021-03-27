@@ -38,7 +38,7 @@ static int add_byte(uint8_t *buf, int &idx, uint8_t b)
     return b;
 }
 
-size_t SHDLC::build_mosi(uint8_t *buf, uint8_t cmd, size_t data_len, const uint8_t *data)
+size_t SHDLC::build_tx(uint8_t *buf, uint8_t cmd, size_t data_len, const uint8_t *data)
 {
     uint8_t sum = 0;
     int index = 0;
@@ -72,7 +72,7 @@ uint8_t SHDLC::get_state(void)
     return _state;
 }
 
-bool SHDLC::proc_miso(uint8_t c, uint8_t cmd)
+bool SHDLC::process_rx(uint8_t c, uint8_t cmd)
 {
     switch (_state) {
     case SHDLC_START:

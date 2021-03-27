@@ -28,7 +28,7 @@ int SPS30::exchange(uint8_t cmd, size_t out_len)
     size_t in_len;
 
     // build command and send it
-    int len = shdlc.build_mosi(buf, cmd, out_len, _mosi);
+    int len = shdlc.build_tx(buf, cmd, out_len, _mosi);
     _serial->write(buf, len);
     printhex(buf, len);
 
@@ -37,7 +37,7 @@ int SPS30::exchange(uint8_t cmd, size_t out_len)
     while ((millis() - start) < DEFAULT_TIMEOUT) {
         while (_serial->available()) {
             char c = _serial->read();
-            if (shdlc.proc_miso(c, cmd)) {
+            if (shdlc.process_rx(c, cmd)) {
                 in_len = shdlc.get_data(_miso);
                 printhex(_miso, in_len);
                 return in_len;
