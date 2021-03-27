@@ -26,6 +26,7 @@ public:
     bool start(bool use_float);
     bool stop(void);
     bool read_measurement(uint16_t *pm1_0, uint16_t *pm2_5, uint16_t *pm4_0, uint16_t *pm10, uint16_t *ps);
+    bool clean_fan(void);
 
 };
 

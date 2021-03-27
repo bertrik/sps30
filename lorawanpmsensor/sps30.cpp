@@ -98,4 +98,11 @@ bool SPS30::read_measurement(uint16_t *pm1_0, uint16_t *pm2_5, uint16_t *pm4_0, 
     return true;
 }
 
+bool SPS30::clean_fan(void)
+{
+    int len = exchange(0x56, 0);
+    return (len == 0);
+}
+
+
 
