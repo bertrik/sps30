@@ -56,7 +56,7 @@ size_t SHDLC::build_tx(uint8_t *buf, uint8_t cmd, size_t data_len, const uint8_t
     for (int i = 0; i < data_len; i++) {
         sum += add_byte(buf, index, data[i]);
     }
-    buf[index++] = sum ^ 0xFF;
+    add_byte(buf, index, sum ^ 0xFF);
     buf[index++] = 0x7E;
     return index;
 }
