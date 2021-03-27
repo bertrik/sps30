@@ -358,7 +358,7 @@ static int do_send(int argc, char *argv[])
 
 static int sps_start(int argc, char *argv[])
 {
-    bool result = sps.start(false);
+    bool result = sps.start();
     return result ? CMD_OK : -1;
 }
 
@@ -388,6 +388,40 @@ static int sps_read_measurement(int argc, char *argv[])
     return -1;
 }
 
+static int sps_sleep(int argc, char *argv[])
+{
+    return sps.sleep() ? CMD_OK : -1;
+}
+
+static int sps_wakeup(int argc, char *argv[])
+{
+    return sps.wakeup() ? CMD_OK : -1;
+}
+
+static int sps_clean_fan(int argc, char *argv[])
+{
+    return sps.clean_fan() ? CMD_OK : -1;
+}
+
+static int sps_autoclean(int argc, char *argv[])
+{
+    uint32_t interval;
+    bool result;
+
+    if (argc < 2) {
+        printf("Reading auto-clean interval\n");
+        result = sps.read_autoclean_interval(&interval);
+        if (result) {
+            printf("Auto-clean interval: %u\n", interval);
+        }
+    } else {
+        interval = atoi(argv[1]);
+        printf("Writing auto-clean interval: %u\n", interval);
+        result = sps.write_autoclean_interval(interval);
+    }
+    return result ? CMD_OK : -1;
+}
+
 static int sps_device_info(int argc, char *argv[])
 {
     char product_type[20];
@@ -402,17 +436,34 @@ static int sps_device_info(int argc, char *argv[])
     return -1;
 }
 
-static int sps_clean_fan(int argc, char *argv[])
+static int sps_read_version(int argc, char *argv[])
 {
-    return sps.clean_fan() ? CMD_OK : -1;
+    uint16_t fw_version, hw_version, shdlc_version;
+    if (sps.read_version(&fw_version, &hw_version, &shdlc_version)) {
+        printf("fw_version:    %04X\n", fw_version);
+        printf("hw_version:    %04X\n", hw_version);
+        printf("shdlc_version: %04X\n", shdlc_version);
+        return CMD_OK;
+    }
+    return -1;
+}
+
+static int sps_reset(int argc, char *argv[])
+{
+    return sps.reset() ? CMD_OK : -1;
 }
 
 static const cmd_t sps_commands[] = {
     {"00", sps_start, "Start measurement"},
     {"01", sps_stop, "Stop measurement"},
     {"03", sps_read_measurement, "Read measured value"},
-    {"d0", sps_device_info, "Device information"},
+    {"10", sps_sleep, "Sleep"},
+    {"11", sps_wakeup, "Wake-up"},
     {"56", sps_clean_fan, "Start fan cleaning"},
+    {"80", sps_autoclean, "[interval] Read/write autoclean interval"},
+    {"d0", sps_device_info, "Device information"},
+    {"d1", sps_read_version, "Read version info"},
+    {"d3", sps_reset, "Reset"},
     { NULL, NULL, NULL }
 };
 

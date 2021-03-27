@@ -22,11 +22,16 @@ public:
      */
     explicit SPS30(Stream *serial);
 
-    bool device_info(char *product_type, char *serial_number);
-    bool start(bool use_float);
+    bool start();
     bool stop(void);
     bool read_measurement(uint16_t *pm1_0, uint16_t *pm2_5, uint16_t *pm4_0, uint16_t *pm10, uint16_t *ps);
+    bool sleep(void);
+    bool wakeup(void);
     bool clean_fan(void);
-
+    bool read_autoclean_interval(uint32_t *interval);
+    bool write_autoclean_interval(uint32_t interval);
+    bool device_info(char *product_type, char *serial_number);
+    bool read_version(uint16_t *fw_version, uint16_t *hw_version, uint16_t *shdlc_version);
+    bool reset(void);
 };
 
