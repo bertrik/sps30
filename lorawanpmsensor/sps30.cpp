@@ -82,7 +82,7 @@ bool SPS30::sleep(void)
 bool SPS30::wakeup(void)
 {
     _serial->write(0xFF);
-    return (exchange(0x10, 0) == 0);
+    return (exchange(0x11, 0) == 0);
 }
 
 bool SPS30::clean_fan(void)
